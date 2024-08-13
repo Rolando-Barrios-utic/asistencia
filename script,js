@@ -1,0 +1,17 @@
+
+document.getElementById('attendanceForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const formData = new FormData(this);
+    const jsonData = {};
+    for (const [key, value] of formData.entries()) {
+        jsonData[key] = value;
+    }
+    const qrData = JSON.stringify(jsonData);
+    generateQR(qrData);
+});
+
+function generateQR(data) {
+    const qrCodeDiv = document.getElementById('qrCode');
+    qrCodeDiv.innerHTML = ''; // Limpiamos cualquier código QR previo
+    new QRCode(qrCodeDiv, data);
+}

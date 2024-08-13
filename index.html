@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Asistencia</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+</head>
+<body>
+    <h1>Registro de Asistencia</h1>
+    <form id="registroForm">
+        <!-- Aquí van los campos del formulario -->
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" name="nombre" required><br><br>
+    
+        <label for="apellido">Apellido:</label>
+        <input type="text" id="apellido" name="apellido" required><br><br>
+    
+        <label for="cedula">Cédula de Identidad:</label>
+        <input type="text" id="cedula" name="cedula" required><br><br>
+    
+        <label for="curso">Curso:</label>
+        <select id="curso" name="curso" required>
+            <option value="Matemáticas">Matemática Aplicada</option>
+            <option value="Historia">Historia</option>
+            <option value="Ciencias">Ciencias</option>
+            <option value="Literatura">Literatura</option>
+            <option value="Ingles">Ingles</option>
+            <option value="Algoritmia">Algoritmia</option>
+        </select><br><br>
+    
+        <label for="turno">Turno:</label>
+        <input type="radio" id="turnoMañana" name="turno" value="Mañana" required>
+        <label for="turnoMañana">Mañana</label>
+        <input type="radio" id="turnoTarde" name="turno" value="Tarde">
+        <label for="turnoTarde">Tarde</label>
+    
+        <label for="email">Correo electrónico:</label>
+        <input type="email" id="email" name="email" required><br><br>
+    
+        <label for="telefono">Teléfono:</label>
+        <input type="tel" id="telefono" name="telefono" required><br><br>
+    
+        <label for="comentario">Comentario:</label><br>
+        <textarea id="comentario" name="comentario" rows="4" cols="50"></textarea><br><br>
+    
+        <button type="button" onclick="generateQRCode()">Generar QR</button>
+    </form>
+
+    <div id="qrCode"></div>
+
+    <script>
+        async function generateQRCode() {
+            try {
+                // Obtener los datos del formulario
+                const nombre = document.getElementById('nombre').value;
+                const apellido = document.getElementById('apellido').value;
+                const cedula = document.getElementById('cedula').value;
+                const curso = document.getElementById('curso').value;
+                const turno = document.querySelector('input[name="turno"]:checked')?.value;
+                const email = document.getElementById('email').value;
+                const telefono = document.getElementById('telefono').value;
+                const comentario = document.getElementById('comentario').value;
+
+                // Preparar los datos para enviar al servidor
+                const formData = new FormData();
+                formData.append('nombre', nombre);
+                formData.append('apellido', apellido);
+                formData.append('cedula', cedula);
+                formData.append('curso', curso);
+                formData.append('turno', turno);
+                formData.append('email', email);
+                formData.append('telefono', telefono);
+                formData.append('comentario', comentario);
+
+                // Enviar los datos al servidor para obtener un identificador único
+                const response = await fetch('guardar_datos.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('Error al enviar los datos');
+
+                const result = await response.json(); // Asumiendo que `guardar_datos.php` devuelve un JSON con un identificador
+                const id = result.id; // El identificador único recibido
+
+                // Crear la URL para el código QR
+                const url = `https://example.com/datos_alumno.php?id=${id}`;
+
+                // Limpiar el contenedor del código QR anterior
+                document.getElementById('qrCode').innerHTML = '';
+
+                // Generar el código QR con la URL
+                new QRCode(document.getElementById("qrCode"), {
+                    text: url,
+                    width: 128,
+                    height: 128
+                });
+
+                alert('Código QR generado correctamente');
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al generar el código QR');
+            }
+        }
+    </script>
+</body>
+</html>
